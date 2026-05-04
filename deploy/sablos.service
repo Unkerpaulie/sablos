@@ -1,0 +1,23 @@
+[Unit]
+Description=sablos Django site (gunicorn)
+After=network.target
+
+[Service]
+Type=notify
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/sablos_root
+EnvironmentFile=/home/deploy/sablos_root/.env
+ExecStart=/home/deploy/sablos_root/.venv/bin/gunicorn \
+    --workers 3 \
+    --bind unix:/run/sablos/sablos.sock \
+    --access-logfile - \
+    --error-logfile - \
+    config.wsgi:application
+Restart=on-failure
+RestartSec=5
+RuntimeDirectory=sablos
+RuntimeDirectoryMode=0755
+
+[Install]
+WantedBy=multi-user.target
