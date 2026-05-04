@@ -46,6 +46,7 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             "launch_domain",
             "launch_specs",
             "is_completed",
+            "is_hidden",
         )
 
 

@@ -21,6 +21,9 @@
       {% if project.is_completed %}
         <span class="badge bg-success ms-2">Completed</span>
       {% endif %}
+      {% if user.is_staff and project.is_hidden %}
+        <span class="badge bg-dark ms-2">Hidden</span>
+      {% endif %}
     </div>
     {% if user.is_staff %}
       <div class="btn-group">

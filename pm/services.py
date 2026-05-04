@@ -21,22 +21,31 @@ class DashboardGroup:
     objectives: list[Objective]
 
 
-def objectives_with_comment_count() -> QuerySet[Objective]:
-    """Base objective queryset annotated with ``comment_count``."""
-    return Objective.objects.annotate(comment_count=Count("comments"))
+def objectives_with_comment_count(user=None) -> QuerySet[Objective]:
+    """Base objective queryset annotated with ``comment_count``.
+
+    When ``user`` is provided, the queryset is filtered to objectives
+    belonging to projects visible to that user.
+    """
+    qs = Objective.objects.annotate(comment_count=Count("comments"))
+    if user is not None:
+        qs = qs.visible_to(user)
+    return qs
 
 
-def get_dashboard_groups() -> list[DashboardGroup]:
+def get_dashboard_groups(user) -> list[DashboardGroup]:
     """Return active projects with their open objectives.
 
     Only objectives whose status is ``Open`` (``IN_PROGRESS``) are
-    surfaced on the dashboard; completed projects are excluded.
+    surfaced on the dashboard; completed and hidden-from-user projects
+    are excluded.
     """
-    open_objectives = objectives_with_comment_count().filter(
+    open_objectives = objectives_with_comment_count(user).filter(
         status=Objective.Status.IN_PROGRESS,
     )
     projects = (
-        Project.objects.filter(is_completed=False)
+        Project.objects.visible_to(user)
+        .filter(is_completed=False)
         .select_related("client")
         .prefetch_related(
             Prefetch(
@@ -53,22 +62,31 @@ def get_dashboard_groups() -> list[DashboardGroup]:
     ]
 
 
-def list_projects_grouped_by_client() -> Iterable[tuple]:
-    """Yield ``(client, [projects])`` tuples in display order."""
+def list_projects_grouped_by_client(user) -> Iterable[tuple]:
+    """Yield ``(client, [projects])`` tuples in display order.
+
+    Clients with no projects visible to ``user`` are omitted.
+    """
     from .models import Client  # local import to avoid cycles
 
-    clients = Client.objects.prefetch_related(
-        Prefetch(
-            "projects",
-            queryset=Project.objects.order_by("is_completed", "name"),
+    visible_projects = Project.objects.visible_to(user)
+    clients = (
+        Client.objects.filter(projects__in=visible_projects)
+        .distinct()
+        .prefetch_related(
+            Prefetch(
+                "projects",
+                queryset=visible_projects.order_by("is_completed", "name"),
+            )
         )
-    ).order_by("name")
+        .order_by("name")
+    )
     for client in clients:
         yield client, list(client.projects.all())
 
 
-def search_comments(query: str | None) -> QuerySet[Comment]:
-    qs = Comment.objects.select_related(
+def search_comments(query: str | None, user) -> QuerySet[Comment]:
+    qs = Comment.objects.visible_to(user).select_related(
         "objective",
         "objective__project",
         "objective__project__client",

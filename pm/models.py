@@ -11,6 +11,29 @@ from django.urls import reverse
 from core.fields import MarkdownField
 
 
+class ProjectQuerySet(models.QuerySet):
+    """Project queryset honoring per-user visibility."""
+
+    def visible_to(self, user) -> "ProjectQuerySet":
+        if getattr(user, "is_staff", False):
+            return self
+        return self.filter(is_hidden=False)
+
+
+class ObjectiveQuerySet(models.QuerySet):
+    def visible_to(self, user) -> "ObjectiveQuerySet":
+        if getattr(user, "is_staff", False):
+            return self
+        return self.filter(project__is_hidden=False)
+
+
+class CommentQuerySet(models.QuerySet):
+    def visible_to(self, user) -> "CommentQuerySet":
+        if getattr(user, "is_staff", False):
+            return self
+        return self.filter(objective__project__is_hidden=False)
+
+
 class TimestampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -53,6 +76,12 @@ class Project(TimestampedModel):
         hint="Launch specifications.",
     )
     is_completed = models.BooleanField(default=False)
+    is_hidden = models.BooleanField(
+        default=False,
+        help_text="Hide this project (and everything inside it) from guest users.",
+    )
+
+    objects = ProjectQuerySet.as_manager()
 
     class Meta:
         ordering = ("client__name", "name")
@@ -109,6 +138,8 @@ class Objective(TimestampedModel):
     )
     due_date = models.DateField(null=True, blank=True)
 
+    objects = ObjectiveQuerySet.as_manager()
+
     class Meta:
         ordering = ("priority", "due_date", "-created_at")
 
@@ -138,6 +169,8 @@ class Comment(TimestampedModel):
         related_name="comments",
     )
     body = MarkdownField()
+
+    objects = CommentQuerySet.as_manager()
 
     class Meta:
         ordering = ("-created_at",)

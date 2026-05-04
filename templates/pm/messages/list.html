@@ -16,45 +16,83 @@
       <table class="table table-hover align-middle">
         <thead>
           <tr>
-            <th style="width:6%">Read</th>
-            <th>From</th>
+            <th style="width:22%">From</th>
             <th>Message</th>
             <th style="width:14%">Received</th>
           </tr>
         </thead>
         <tbody>
           {% for message in contact_messages %}
-            <tr class="{% if not message.is_read %}fw-semibold{% endif %}">
-              <td>
-                <form method="post"
-                      action="{% url 'pm:message_toggle_read' message.pk %}"
-                      class="m-0">
-                  {% csrf_token %}
-                  <input type="checkbox"
-                         class="form-check-input"
-                         {% if message.is_read %}checked{% endif %}
-                         onchange="this.form.submit()"
-                         aria-label="Mark as read">
-                  <noscript>
-                    <button type="submit" class="btn btn-sm btn-link p-0">
-                      {% if message.is_read %}Unread{% else %}Read{% endif %}
-                    </button>
-                  </noscript>
-                </form>
-              </td>
+            <tr class="{% if not message.is_read %}fw-semibold{% endif %}"
+                role="button"
+                data-bs-toggle="modal"
+                data-bs-target="#message-modal-{{ message.pk }}">
               <td>
                 <div>{{ message.name }}</div>
-                <div class="text-body-secondary small">
-                  <a href="mailto:{{ message.email }}">{{ message.email }}</a>
+                <div class="text-body-secondary small fw-normal">
+                  {{ message.email }}
                 </div>
               </td>
-              <td class="text-body-secondary">{{ message.body|markdown }}</td>
-              <td class="text-body-secondary small">{{ message.created_at|date:"Y-m-d H:i" }}</td>
+              <td class="text-body-secondary">
+                {{ message.body|truncate_chars:120 }}
+              </td>
+              <td class="text-body-secondary small fw-normal">
+                {{ message.created_at|date:"Y-m-d H:i" }}
+              </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
+
+    {% for message in contact_messages %}
+      <div class="modal fade"
+           id="message-modal-{{ message.pk }}"
+           tabindex="-1"
+           aria-labelledby="message-modal-{{ message.pk }}-label"
+           aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div>
+                <h2 class="h5 modal-title mb-1" id="message-modal-{{ message.pk }}-label">
+                  {{ message.name }}
+                </h2>
+                <div class="text-body-secondary small">
+                  <a href="mailto:{{ message.email }}">{{ message.email }}</a>
+                  · {{ message.created_at|date:"Y-m-d H:i" }}
+                </div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">{{ message.body|markdown }}</div>
+            <div class="modal-footer justify-content-between">
+              <form method="post"
+                    action="{% url 'pm:message_toggle_read' message.pk %}"
+                    class="m-0 form-check">
+                {% csrf_token %}
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="mark-read-{{ message.pk }}"
+                       {% if message.is_read %}checked{% endif %}
+                       onchange="this.form.submit()">
+                <label class="form-check-label" for="mark-read-{{ message.pk }}">
+                  Mark as read
+                </label>
+                <noscript>
+                  <button type="submit" class="btn btn-sm btn-link p-0 ms-2">
+                    {% if message.is_read %}Mark unread{% else %}Mark read{% endif %}
+                  </button>
+                </noscript>
+              </form>
+              <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
 
     {% if is_paginated %}
       <nav>

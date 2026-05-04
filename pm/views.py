@@ -8,6 +8,7 @@ from __future__ import annotations
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
+from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -37,7 +38,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["groups"] = services.get_dashboard_groups()
+        context["groups"] = services.get_dashboard_groups(self.request.user)
         return context
 
 
@@ -56,7 +57,10 @@ class ClientDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "client"
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related("projects")
+        projects_qs = Project.objects.visible_to(self.request.user)
+        return super().get_queryset().prefetch_related(
+            Prefetch("projects", queryset=projects_qs),
+        )
 
 
 class ClientCreateView(StaffLoginRequiredMixin, CreateView):
@@ -86,7 +90,9 @@ class ProjectListView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["client_projects"] = list(services.list_projects_grouped_by_client())
+        context["client_projects"] = list(
+            services.list_projects_grouped_by_client(self.request.user)
+        )
         return context
 
 
@@ -96,11 +102,10 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "project"
 
     def get_queryset(self):
-        from django.db.models import Prefetch
-
         return (
             super()
             .get_queryset()
+            .visible_to(self.request.user)
             .select_related("client")
             .prefetch_related(
                 Prefetch(
@@ -142,6 +147,7 @@ class ObjectiveDetailView(LoginRequiredMixin, FormMixin, DetailView):
         return (
             super()
             .get_queryset()
+            .visible_to(self.request.user)
             .select_related("project", "project__client")
             .prefetch_related("comments")
         )
@@ -199,7 +205,9 @@ class CommentListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        return services.search_comments(self.request.GET.get("q"))
+        return services.search_comments(
+            self.request.GET.get("q"), self.request.user
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
