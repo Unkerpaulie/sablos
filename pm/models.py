@@ -21,7 +21,9 @@ class TimestampedModel(models.Model):
 
 class Client(TimestampedModel):
     name = models.CharField(max_length=200, unique=True)
-    notes = models.TextField(blank=True)
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=40, blank=True)
+    notes = MarkdownField(blank=True)
 
     class Meta:
         ordering = ("name",)
@@ -42,13 +44,13 @@ class Project(TimestampedModel):
     name = models.CharField(max_length=200)
     init_prompt = MarkdownField(
         blank=True,
-        help_text="Initial brief / prompt for the project (Markdown).",
+        hint="Initial brief / prompt for the project.",
     )
     repo_link = models.URLField(blank=True)
     launch_domain = models.CharField(max_length=255, blank=True)
     launch_specs = MarkdownField(
         blank=True,
-        help_text="Launch specifications (Markdown).",
+        hint="Launch specifications.",
     )
     is_completed = models.BooleanField(default=False)
 
@@ -135,7 +137,7 @@ class Comment(TimestampedModel):
         on_delete=models.CASCADE,
         related_name="comments",
     )
-    body = models.TextField()
+    body = MarkdownField()
 
     class Meta:
         ordering = ("-created_at",)

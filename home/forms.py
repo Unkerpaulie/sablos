@@ -8,7 +8,6 @@ class ContactForm(forms.ModelForm):
     class Meta:
         model = ContactMessage
         fields = ("name", "email", "body")
-        widgets = {"body": forms.Textarea(attrs={"rows": 5})}
         labels = {"body": "Message"}
 
     def __init__(self, *args, **kwargs):

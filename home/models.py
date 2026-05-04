@@ -3,13 +3,15 @@ from __future__ import annotations
 
 from django.db import models
 
+from core.fields import MarkdownField
+
 
 class ContactMessage(models.Model):
     """A submission from the public contact form."""
 
     name = models.CharField(max_length=120)
     email = models.EmailField()
-    body = models.TextField()
+    body = MarkdownField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

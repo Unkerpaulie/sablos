@@ -38,9 +38,22 @@ class MarkdownFormField(forms.CharField):
 
 
 class MarkdownField(models.TextField):
-    """Stores Markdown text. Behaves like TextField at the database level."""
+    """Stores Markdown text. Behaves like TextField at the database level.
+
+    Accepts a ``hint`` kwarg that becomes the form ``help_text`` with the
+    suffix ``(Markdown)`` automatically appended. Pass an empty hint (the
+    default) to surface just ``(Markdown)``.
+    """
 
     description = "Markdown text"
+    MARKDOWN_SUFFIX = "(Markdown)"
+
+    def __init__(self, *args, hint: str = "", **kwargs):
+        prefix = (hint or "").strip()
+        kwargs["help_text"] = (
+            f"{prefix} {self.MARKDOWN_SUFFIX}" if prefix else self.MARKDOWN_SUFFIX
+        )
+        super().__init__(*args, **kwargs)
 
     def formfield(self, **kwargs):
         defaults = {"form_class": MarkdownFormField, "widget": MarkdownTextarea}

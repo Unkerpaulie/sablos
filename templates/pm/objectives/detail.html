@@ -45,7 +45,7 @@
         <span class="text-body-secondary small">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
         <a href="{% url 'pm:comment_delete' comment.pk %}" class="text-danger small">delete</a>
       </div>
-      <div>{{ comment.body|linebreaksbr }}</div>
+      <div>{{ comment.body|markdown }}</div>
     </div>
   {% empty %}
     <p class="text-body-secondary">No comments yet.</p>

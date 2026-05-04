@@ -1,4 +1,5 @@
 {% extends "layouts/dashboard.html" %}
+{% load pm_extras %}
 
 {% block title %}Comments — WIP{% endblock %}
 
@@ -27,7 +28,7 @@
             </span>
             <span>{{ comment.created_at|date:"Y-m-d H:i" }}</span>
           </div>
-          <div>{{ comment.body|linebreaksbr }}</div>
+          <div>{{ comment.body|markdown }}</div>
         </div>
       </div>
     {% endfor %}

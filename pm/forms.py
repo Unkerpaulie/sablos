@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from django import forms
 
+from core.fields import MarkdownTextarea
+
 from .models import Client, Comment, Objective, Project
 
 
@@ -30,7 +32,7 @@ class BootstrapFormMixin:
 class ClientForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Client
-        fields = ("name", "notes")
+        fields = ("name", "email", "phone", "notes")
 
 
 class ProjectForm(BootstrapFormMixin, forms.ModelForm):
@@ -62,5 +64,5 @@ class CommentForm(BootstrapFormMixin, forms.ModelForm):
         model = Comment
         fields = ("body",)
         widgets = {
-            "body": forms.Textarea(attrs={"rows": 3, "placeholder": "Add a comment..."}),
+            "body": MarkdownTextarea(attrs={"rows": 3, "placeholder": "Add a comment..."}),
         }

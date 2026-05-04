@@ -1,4 +1,5 @@
 {% extends "layouts/dashboard.html" %}
+{% load pm_extras %}
 
 {% block title %}Messages — WIP{% endblock %}
 
@@ -47,7 +48,7 @@
                   <a href="mailto:{{ message.email }}">{{ message.email }}</a>
                 </div>
               </td>
-              <td class="text-body-secondary">{{ message.body|linebreaksbr }}</td>
+              <td class="text-body-secondary">{{ message.body|markdown }}</td>
               <td class="text-body-secondary small">{{ message.created_at|date:"Y-m-d H:i" }}</td>
             </tr>
           {% endfor %}
