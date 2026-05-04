@@ -1,0 +1,53 @@
+{% extends "layouts/dashboard.html" %}
+{% load pm_extras %}
+
+{% block title %}{{ objective.short_description }} — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'pm:project_list' %}">Projects</a></li>
+      <li class="breadcrumb-item">
+        <a href="{{ objective.project.get_absolute_url }}">{{ objective.project.name }}</a>
+      </li>
+      <li class="breadcrumb-item active">{{ objective.short_description }}</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <span class="badge {{ objective.status|status_badge }}">{{ objective.get_status_display }}</span>
+      <span class="badge {{ objective.priority|priority_badge }}">{{ objective.get_priority_display }}</span>
+      {% if objective.due_date %}
+        <span class="text-body-secondary small ms-2">due {{ objective.due_date }}</span>
+      {% endif %}
+    </div>
+    <div class="btn-group">
+      <a href="{% url 'pm:objective_update' objective.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'pm:objective_delete' objective.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">{{ objective.description|linebreaksbr }}</div>
+  </div>
+
+  <h2 class="h5 mb-3">Comments</h2>
+  <form method="post" class="mb-4">
+    {% csrf_token %}
+    {% include "components/form_fields.html" %}
+    <button type="submit" class="btn btn-primary btn-sm">Add comment</button>
+  </form>
+
+  {% for comment in objective.comments.all %}
+    <div class="border-start border-3 ps-3 mb-3">
+      <div class="d-flex justify-content-between">
+        <span class="text-body-secondary small">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
+        <a href="{% url 'pm:comment_delete' comment.pk %}" class="text-danger small">delete</a>
+      </div>
+      <div>{{ comment.body|linebreaksbr }}</div>
+    </div>
+  {% empty %}
+    <p class="text-body-secondary">No comments yet.</p>
+  {% endfor %}
+{% endblock %}

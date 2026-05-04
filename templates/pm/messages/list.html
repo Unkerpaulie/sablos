@@ -1,0 +1,80 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Messages — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Messages</h1>
+    {% if unread_count %}
+      <span class="badge bg-primary">{{ unread_count }} unread</span>
+    {% endif %}
+  </div>
+
+  {% if contact_messages %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th style="width:6%">Read</th>
+            <th>From</th>
+            <th>Message</th>
+            <th style="width:14%">Received</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for message in contact_messages %}
+            <tr class="{% if not message.is_read %}fw-semibold{% endif %}">
+              <td>
+                <form method="post"
+                      action="{% url 'pm:message_toggle_read' message.pk %}"
+                      class="m-0">
+                  {% csrf_token %}
+                  <input type="checkbox"
+                         class="form-check-input"
+                         {% if message.is_read %}checked{% endif %}
+                         onchange="this.form.submit()"
+                         aria-label="Mark as read">
+                  <noscript>
+                    <button type="submit" class="btn btn-sm btn-link p-0">
+                      {% if message.is_read %}Unread{% else %}Read{% endif %}
+                    </button>
+                  </noscript>
+                </form>
+              </td>
+              <td>
+                <div>{{ message.name }}</div>
+                <div class="text-body-secondary small">
+                  <a href="mailto:{{ message.email }}">{{ message.email }}</a>
+                </div>
+              </td>
+              <td class="text-body-secondary">{{ message.body|linebreaksbr }}</td>
+              <td class="text-body-secondary small">{{ message.created_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if is_paginated %}
+      <nav>
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            </li>
+          {% endif %}
+          <li class="page-item disabled">
+            <span class="page-link">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+          </li>
+          {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  {% else %}
+    <p class="text-body-secondary">No messages yet.</p>
+  {% endif %}
+{% endblock %}

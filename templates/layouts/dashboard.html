@@ -1,0 +1,16 @@
+{% extends "layouts/base.html" %}
+
+{% block body %}
+  {% include "components/pm_navbar.html" %}
+  <div class="container-fluid flex-grow-1">
+    <div class="row">
+      <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+        {% include "components/pm_sidebar.html" %}
+      </nav>
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+        {% include "components/messages.html" %}
+        {% block dashboard_content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+{% endblock %}

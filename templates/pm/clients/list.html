@@ -1,0 +1,33 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Clients — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Clients</h1>
+    <a href="{% url 'pm:client_create' %}" class="btn btn-sm btn-primary">+ New client</a>
+  </div>
+
+  {% if clients %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr><th>Name</th><th>Created</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for client in clients %}
+            <tr>
+              <td><a href="{{ client.get_absolute_url }}">{{ client.name }}</a></td>
+              <td class="text-body-secondary">{{ client.created_at|date:"Y-m-d" }}</td>
+              <td class="text-end">
+                <a href="{% url 'pm:client_update' client.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">No clients yet.</div>
+  {% endif %}
+{% endblock %}

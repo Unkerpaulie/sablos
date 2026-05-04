@@ -1,0 +1,42 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{{ client.name }} — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'pm:client_list' %}">Clients</a></li>
+      <li class="breadcrumb-item active">{{ client.name }}</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">{{ client.name }}</h1>
+    <div class="btn-group">
+      <a href="{% url 'pm:client_update' client.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+      <a href="{% url 'pm:client_delete' client.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+    </div>
+  </div>
+
+  {% if client.notes %}
+    <p class="text-body-secondary">{{ client.notes|linebreaksbr }}</p>
+  {% endif %}
+
+  <h2 class="h5 mt-4 mb-3">Projects</h2>
+  {% if client.projects.all %}
+    <ul class="list-group">
+      {% for project in client.projects.all %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+          {% if project.is_completed %}
+            <span class="badge bg-success">Completed</span>
+          {% else %}
+            <span class="badge bg-primary">Active</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-body-secondary">No projects yet.</p>
+  {% endif %}
+{% endblock %}

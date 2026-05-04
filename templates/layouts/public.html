@@ -1,0 +1,10 @@
+{% extends "layouts/base.html" %}
+
+{% block body %}
+  {% include "components/public_navbar.html" %}
+  <main class="container py-5 flex-grow-1">
+    {% include "components/messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  {% include "components/footer.html" %}
+{% endblock %}

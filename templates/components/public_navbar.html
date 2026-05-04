@@ -1,0 +1,32 @@
+{% url 'home:index' as url_home %}
+{% url 'pm:dashboard' as url_pm %}
+{% url 'home:contact' as url_contact %}
+<nav class="navbar navbar-expand-md border-bottom bg-body-tertiary">
+  <div class="container">
+    <a class="navbar-brand fw-semibold" href="{{ url_home }}">paul</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+            data-bs-target="#publicNav" aria-controls="publicNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="publicNav">
+      <ul class="navbar-nav me-auto mb-2 mb-md-0">
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == url_home %}active{% endif %}"
+             href="{{ url_home }}">Hi</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.path|slice:':4' == '/wip' %}active{% endif %}"
+             href="{{ url_pm }}">WIP</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == url_contact %}active{% endif %}"
+             href="{{ url_contact }}">Say Hi</a>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center gap-2">
+        {% include "components/theme_toggle.html" %}
+      </div>
+    </div>
+  </div>
+</nav>

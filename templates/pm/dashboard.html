@@ -1,0 +1,85 @@
+{% extends "layouts/dashboard.html" %}
+{% load pm_extras %}
+
+{% block title %}Dashboard — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Current objectives</h1>
+    <a href="{% url 'pm:objective_create' %}" class="btn btn-sm btn-primary">+ New objective</a>
+  </div>
+
+  {% if not groups %}
+    <div class="alert alert-info">
+      No active projects yet.
+      <a href="{% url 'pm:project_create' %}" class="alert-link">Create your first project</a>.
+    </div>
+  {% endif %}
+
+  {% for group in groups %}
+    {% with project=group.project %}
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center"
+             role="button"
+             data-bs-toggle="collapse"
+             data-bs-target="#proj-{{ project.pk }}"
+             aria-expanded="true"
+             aria-controls="proj-{{ project.pk }}">
+          <div>
+            <strong>{{ project.name }}</strong>
+            <span class="text-body-secondary small ms-2">{{ project.client.name }}</span>
+          </div>
+          <div class="d-flex gap-2 align-items-center">
+            <span class="badge bg-secondary">{{ group.objectives|length }}</span>
+            <a href="{% url 'pm:project_detail' project.pk %}"
+               class="btn btn-sm btn-outline-secondary"
+               onclick="event.stopPropagation();">Open</a>
+          </div>
+        </div>
+        <div id="proj-{{ project.pk }}" class="collapse show">
+          {% if group.objectives %}
+            <div class="table-responsive">
+              <table class="table table-hover mb-0 align-middle">
+                <thead>
+                  <tr>
+                    <th>Objective</th>
+                    <th style="width:12%">Status</th>
+                    <th style="width:10%">Priority</th>
+                    <th style="width:12%">Due</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for objective in group.objectives %}
+                    <tr>
+                      <td>
+                        <a href="{% url 'pm:objective_detail' objective.pk %}">
+                          {{ objective.short_description }}
+                        </a>
+                      </td>
+                      <td>
+                        <span class="badge {{ objective.status|status_badge }}">
+                          {{ objective.get_status_display }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge {{ objective.priority|priority_badge }}">
+                          {{ objective.get_priority_display }}
+                        </span>
+                      </td>
+                      <td>{{ objective.due_date|default:"—" }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="card-body text-body-secondary">
+              No open objectives.
+              <a href="{% url 'pm:objective_create' %}?project={{ project.pk }}">Add one</a>.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endwith %}
+  {% endfor %}
+{% endblock %}

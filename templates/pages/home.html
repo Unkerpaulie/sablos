@@ -1,0 +1,18 @@
+{% extends "layouts/public.html" %}
+
+{% block title %}Hi — Paul{% endblock %}
+
+{% block content %}
+  <section class="py-5">
+    <h1 class="display-5 fw-semibold mb-4">Hi, I'm Paul.</h1>
+    <p class="lead mb-3">
+      I'm an application developer, business consultant, part-time educator,
+      and part-time tech tinkerer.
+    </p>
+    <p class="lead mb-4">
+      I'm currently building a lot of useful apps. Contact me if you want to
+      learn more or even help out.
+    </p>
+    <a href="{% url 'home:contact' %}" class="btn btn-primary">Say Hi</a>
+  </section>
+{% endblock %}

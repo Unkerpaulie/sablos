@@ -1,0 +1,56 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}{% if object %}Edit{% else %}New{% endif %} objective — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h3 mb-4">{% if object %}Edit{% else %}New{% endif %} objective</h1>
+  <form method="post" novalidate class="col-lg-8">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label for="{{ form.project.id_for_label }}" class="form-label">Project</label>
+      {{ form.project }}
+      {% for error in form.project.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+      {{ form.description }}
+      {% for error in form.description.errors %}
+        <div class="invalid-feedback d-block">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        <label for="{{ form.status.id_for_label }}" class="form-label">Status</label>
+        {{ form.status }}
+        {% for error in form.status.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="{{ form.priority.id_for_label }}" class="form-label">Priority</label>
+        {{ form.priority }}
+        {% for error in form.priority.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="col-md-4 mb-3">
+        <label for="{{ form.due_date.id_for_label }}" class="form-label">Due date</label>
+        {{ form.due_date }}
+        {% for error in form.due_date.errors %}
+          <div class="invalid-feedback d-block">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="{% url 'pm:dashboard' %}" class="btn btn-link">Cancel</a>
+  </form>
+{% endblock %}

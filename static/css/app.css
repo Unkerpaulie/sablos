@@ -1,0 +1,44 @@
+/* App-wide tweaks layered on top of Bootstrap. */
+
+.sidebar {
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  padding: 0;
+  border-right: 1px solid var(--bs-border-color);
+  background-color: var(--bs-tertiary-bg);
+  overflow-y: auto;
+}
+
+.sidebar .nav-link {
+  color: var(--bs-body-color);
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.sidebar .nav-link:hover {
+  background-color: var(--bs-secondary-bg);
+}
+
+.sidebar .nav-link.active {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
+}
+
+.card-header[role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-header[role="button"]:hover {
+  background-color: var(--bs-secondary-bg);
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+}

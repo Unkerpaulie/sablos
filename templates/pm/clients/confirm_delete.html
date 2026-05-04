@@ -1,0 +1,14 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Delete client — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h3 mb-3">Delete client</h1>
+  <p>Are you sure you want to delete <strong>{{ object.name }}</strong>?
+     All projects and objectives belonging to this client will also be deleted.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{{ object.get_absolute_url }}" class="btn btn-link">Cancel</a>
+  </form>
+{% endblock %}
