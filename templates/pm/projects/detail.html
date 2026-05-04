@@ -29,18 +29,41 @@
     </div>
   </div>
 
-  <div class="row g-3 mb-4">
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header">Init prompt</div>
-        <div class="card-body">{{ project.init_prompt|markdown|default:'<span class="text-body-secondary">—</span>' }}</div>
-      </div>
+  <div class="card mb-3">
+    <div class="card-header d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-link p-0 collapse-toggle text-body collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#proj-init-prompt"
+              aria-expanded="false"
+              aria-controls="proj-init-prompt"
+              aria-label="Toggle init prompt">
+        <span class="collapse-icon-expanded">−</span>
+        <span class="collapse-icon-collapsed">+</span>
+      </button>
+      <span class="fw-semibold">Init prompt</span>
     </div>
-    <div class="col-md-6">
-      <div class="card h-100">
-        <div class="card-header">Launch specs</div>
-        <div class="card-body">{{ project.launch_specs|markdown|default:'<span class="text-body-secondary">—</span>' }}</div>
-      </div>
+    <div id="proj-init-prompt" class="collapse">
+      <div class="card-body">{{ project.init_prompt|markdown|default:'<span class="text-body-secondary">—</span>' }}</div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex align-items-center gap-2">
+      <button class="btn btn-sm btn-link p-0 collapse-toggle text-body collapsed"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#proj-launch-specs"
+              aria-expanded="false"
+              aria-controls="proj-launch-specs"
+              aria-label="Toggle launch specs">
+        <span class="collapse-icon-expanded">−</span>
+        <span class="collapse-icon-collapsed">+</span>
+      </button>
+      <span class="fw-semibold">Launch specs</span>
+    </div>
+    <div id="proj-launch-specs" class="collapse">
+      <div class="card-body">{{ project.launch_specs|markdown|default:'<span class="text-body-secondary">—</span>' }}</div>
     </div>
   </div>
 

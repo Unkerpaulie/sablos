@@ -213,11 +213,6 @@ class MessageListView(StaffLoginRequiredMixin, ListView):
     context_object_name = "contact_messages"
     paginate_by = 25
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["unread_count"] = ContactMessage.objects.filter(is_read=False).count()
-        return context
-
 
 class MessageToggleReadView(StaffLoginRequiredMixin, View):
     """Flip the ``is_read`` flag and return to the list."""

@@ -5,8 +5,8 @@
 {% block dashboard_content %}
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Messages</h1>
-    {% if unread_count %}
-      <span class="badge bg-primary">{{ unread_count }} unread</span>
+    {% if unread_messages_count %}
+      <span class="badge bg-primary">{{ unread_messages_count }} unread</span>
     {% endif %}
   </div>
 

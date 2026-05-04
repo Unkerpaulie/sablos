@@ -25,14 +25,16 @@
   color: var(--bs-primary-text-emphasis);
 }
 
-.card-header[role="button"] {
-  cursor: pointer;
-  user-select: none;
+.collapse-toggle {
+  width: 1.25rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  text-decoration: none;
 }
 
-.card-header[role="button"]:hover {
-  background-color: var(--bs-secondary-bg);
-}
+.collapse-toggle .collapse-icon-collapsed { display: none; }
+.collapse-toggle.collapsed .collapse-icon-expanded { display: none; }
+.collapse-toggle.collapsed .collapse-icon-collapsed { display: inline; }
 
 @media (max-width: 767.98px) {
   .sidebar {
