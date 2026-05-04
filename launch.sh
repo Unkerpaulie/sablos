@@ -94,8 +94,8 @@ Next steps (one-time, as root):
        sudo ln -sf /etc/nginx/sites-available/sablos /etc/nginx/sites-enabled/sablos
        sudo nginx -t && sudo systemctl reload nginx
 
-  3. Issue a TLS certificate (after DNS points at this server):
-       sudo certbot --nginx -d example.com -d www.example.com
+  3. Issue a TLS certificate (skip if sablos.devs.tt already has one):
+       sudo certbot --nginx -d sablos.devs.tt
 
 See launch.md for the full walkthrough.
 EOM

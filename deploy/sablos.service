@@ -4,11 +4,11 @@ After=network.target
 
 [Service]
 Type=notify
-User=deploy
-Group=deploy
-WorkingDirectory=/home/deploy/sablos_root
-EnvironmentFile=/home/deploy/sablos_root/.env
-ExecStart=/home/deploy/sablos_root/.venv/bin/gunicorn \
+User=sablos
+Group=sablos
+WorkingDirectory=/var/www/sablos_root
+EnvironmentFile=/var/www/sablos_root/.env
+ExecStart=/var/www/sablos_root/.venv/bin/gunicorn \
     --workers 3 \
     --bind unix:/run/sablos/sablos.sock \
     --access-logfile - \
