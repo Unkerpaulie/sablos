@@ -22,10 +22,12 @@
         <span class="text-body-secondary small ms-2">due {{ objective.due_date }}</span>
       {% endif %}
     </div>
-    <div class="btn-group">
-      <a href="{% url 'pm:objective_update' objective.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-      <a href="{% url 'pm:objective_delete' objective.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
-    </div>
+    {% if user.is_staff %}
+      <div class="btn-group">
+        <a href="{% url 'pm:objective_update' objective.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+        <a href="{% url 'pm:objective_delete' objective.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+      </div>
+    {% endif %}
   </div>
 
   <div class="card mb-4">
@@ -33,17 +35,21 @@
   </div>
 
   <h2 class="h5 mb-3">Comments</h2>
-  <form method="post" class="mb-4">
-    {% csrf_token %}
-    {% include "components/form_fields.html" %}
-    <button type="submit" class="btn btn-primary btn-sm">Add comment</button>
-  </form>
+  {% if user.is_staff %}
+    <form method="post" class="mb-4">
+      {% csrf_token %}
+      {% include "components/form_fields.html" %}
+      <button type="submit" class="btn btn-primary btn-sm">Add comment</button>
+    </form>
+  {% endif %}
 
   {% for comment in objective.comments.all %}
     <div class="border-start border-3 ps-3 mb-3">
       <div class="d-flex justify-content-between">
         <span class="text-body-secondary small">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
-        <a href="{% url 'pm:comment_delete' comment.pk %}" class="text-danger small">delete</a>
+        {% if user.is_staff %}
+          <a href="{% url 'pm:comment_delete' comment.pk %}" class="text-danger small">delete</a>
+        {% endif %}
       </div>
       <div>{{ comment.body|markdown }}</div>
     </div>

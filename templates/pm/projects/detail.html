@@ -22,11 +22,13 @@
         <span class="badge bg-success ms-2">Completed</span>
       {% endif %}
     </div>
-    <div class="btn-group">
-      <a href="{% url 'pm:objective_create' %}?project={{ project.pk }}" class="btn btn-sm btn-primary">+ Objective</a>
-      <a href="{% url 'pm:project_update' project.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
-      <a href="{% url 'pm:project_delete' project.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
-    </div>
+    {% if user.is_staff %}
+      <div class="btn-group">
+        <a href="{% url 'pm:objective_create' %}?project={{ project.pk }}" class="btn btn-sm btn-primary">+ Objective</a>
+        <a href="{% url 'pm:project_update' project.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+        <a href="{% url 'pm:project_delete' project.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+      </div>
+    {% endif %}
   </div>
 
   <div class="card mb-3">
@@ -48,24 +50,26 @@
     </div>
   </div>
 
-  <div class="card mb-4">
-    <div class="card-header d-flex align-items-center gap-2">
-      <button class="btn btn-sm btn-link p-0 collapse-toggle text-body collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#proj-launch-specs"
-              aria-expanded="false"
-              aria-controls="proj-launch-specs"
-              aria-label="Toggle launch specs">
-        <span class="collapse-icon-expanded">−</span>
-        <span class="collapse-icon-collapsed">+</span>
-      </button>
-      <span class="fw-semibold">Launch specs</span>
+  {% if user.is_staff %}
+    <div class="card mb-4">
+      <div class="card-header d-flex align-items-center gap-2">
+        <button class="btn btn-sm btn-link p-0 collapse-toggle text-body collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#proj-launch-specs"
+                aria-expanded="false"
+                aria-controls="proj-launch-specs"
+                aria-label="Toggle launch specs">
+          <span class="collapse-icon-expanded">−</span>
+          <span class="collapse-icon-collapsed">+</span>
+        </button>
+        <span class="fw-semibold">Launch specs</span>
+      </div>
+      <div id="proj-launch-specs" class="collapse">
+        <div class="card-body">{{ project.launch_specs|markdown|default:'<span class="text-body-secondary">—</span>' }}</div>
+      </div>
     </div>
-    <div id="proj-launch-specs" class="collapse">
-      <div class="card-body">{{ project.launch_specs|markdown|default:'<span class="text-body-secondary">—</span>' }}</div>
-    </div>
-  </div>
+  {% endif %}
 
   <dl class="row small mb-4">
     <dt class="col-sm-2">Repo</dt>
@@ -82,7 +86,13 @@
     <div class="table-responsive">
       <table class="table table-hover align-middle">
         <thead>
-          <tr><th>Objective</th><th>Status</th><th>Priority</th><th>Due</th></tr>
+          <tr>
+            <th>Objective</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Due</th>
+            <th class="text-end">Comments</th>
+          </tr>
         </thead>
         <tbody>
           {% for objective in project.objectives.all %}
@@ -91,6 +101,7 @@
               <td><span class="badge {{ objective.status|status_badge }}">{{ objective.get_status_display }}</span></td>
               <td><span class="badge {{ objective.priority|priority_badge }}">{{ objective.get_priority_display }}</span></td>
               <td>{{ objective.due_date|default:"—" }}</td>
+              <td class="text-end text-body-secondary">{{ objective.comment_count }}</td>
             </tr>
           {% endfor %}
         </tbody>

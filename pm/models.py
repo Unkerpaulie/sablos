@@ -80,10 +80,10 @@ class Project(TimestampedModel):
 
 class Objective(TimestampedModel):
     class Status(models.TextChoices):
-        TODO = "todo", "To do"
-        IN_PROGRESS = "in_progress", "In progress"
-        BLOCKED = "blocked", "Blocked"
-        DONE = "done", "Done"
+        TODO = "todo", "Future"
+        IN_PROGRESS = "in_progress", "Open"
+        BLOCKED = "blocked", "Backlog"
+        DONE = "done", "Closed"
 
     class Priority(models.IntegerChoices):
         HIGH = 1, "High"

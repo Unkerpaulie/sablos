@@ -6,6 +6,8 @@ Views are deliberately thin: data retrieval and aggregation live in
 from __future__ import annotations
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -30,7 +32,7 @@ from .models import Client, Comment, Objective, Project
 # ---------------------------------------------------------------------------
 # Dashboard
 # ---------------------------------------------------------------------------
-class DashboardView(StaffLoginRequiredMixin, TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "pm/dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -42,13 +44,13 @@ class DashboardView(StaffLoginRequiredMixin, TemplateView):
 # ---------------------------------------------------------------------------
 # Clients
 # ---------------------------------------------------------------------------
-class ClientListView(StaffLoginRequiredMixin, ListView):
+class ClientListView(LoginRequiredMixin, ListView):
     model = Client
     template_name = "pm/clients/list.html"
     context_object_name = "clients"
 
 
-class ClientDetailView(StaffLoginRequiredMixin, DetailView):
+class ClientDetailView(LoginRequiredMixin, DetailView):
     model = Client
     template_name = "pm/clients/detail.html"
     context_object_name = "client"
@@ -79,7 +81,7 @@ class ClientDeleteView(StaffLoginRequiredMixin, DeleteView):
 # ---------------------------------------------------------------------------
 # Projects
 # ---------------------------------------------------------------------------
-class ProjectListView(StaffLoginRequiredMixin, TemplateView):
+class ProjectListView(LoginRequiredMixin, TemplateView):
     template_name = "pm/projects/list.html"
 
     def get_context_data(self, **kwargs):
@@ -88,17 +90,24 @@ class ProjectListView(StaffLoginRequiredMixin, TemplateView):
         return context
 
 
-class ProjectDetailView(StaffLoginRequiredMixin, DetailView):
+class ProjectDetailView(LoginRequiredMixin, DetailView):
     model = Project
     template_name = "pm/projects/detail.html"
     context_object_name = "project"
 
     def get_queryset(self):
+        from django.db.models import Prefetch
+
         return (
             super()
             .get_queryset()
             .select_related("client")
-            .prefetch_related("objectives")
+            .prefetch_related(
+                Prefetch(
+                    "objectives",
+                    queryset=services.objectives_with_comment_count(),
+                )
+            )
         )
 
 
@@ -123,7 +132,7 @@ class ProjectDeleteView(StaffLoginRequiredMixin, DeleteView):
 # ---------------------------------------------------------------------------
 # Objectives
 # ---------------------------------------------------------------------------
-class ObjectiveDetailView(StaffLoginRequiredMixin, FormMixin, DetailView):
+class ObjectiveDetailView(LoginRequiredMixin, FormMixin, DetailView):
     model = Objective
     template_name = "pm/objectives/detail.html"
     context_object_name = "objective"
@@ -141,6 +150,8 @@ class ObjectiveDetailView(StaffLoginRequiredMixin, FormMixin, DetailView):
         return reverse("pm:objective_detail", args=[self.object.pk])
 
     def post(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            raise PermissionDenied("Staff access required.")
         self.object = self.get_object()
         form = self.get_form()
         if form.is_valid():
@@ -182,7 +193,7 @@ class ObjectiveDeleteView(StaffLoginRequiredMixin, DeleteView):
 # ---------------------------------------------------------------------------
 # Comments
 # ---------------------------------------------------------------------------
-class CommentListView(StaffLoginRequiredMixin, ListView):
+class CommentListView(LoginRequiredMixin, ListView):
     template_name = "pm/comments/list.html"
     context_object_name = "comments"
     paginate_by = 25
