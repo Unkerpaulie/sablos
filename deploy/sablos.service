@@ -6,9 +6,9 @@ After=network.target
 Type=notify
 User=sablos
 Group=sablos
-WorkingDirectory=/var/www/sablos_root
-EnvironmentFile=/var/www/sablos_root/.env
-ExecStart=/var/www/sablos_root/.venv/bin/gunicorn \
+WorkingDirectory=/var/www/sablos_root/sablos
+EnvironmentFile=/var/www/sablos_root/sablos/.env
+ExecStart=/var/www/sablos_root/sablos/.venv/bin/gunicorn \
     --workers 3 \
     --bind unix:/run/sablos/sablos.sock \
     --access-logfile - \
