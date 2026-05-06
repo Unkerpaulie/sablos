@@ -102,11 +102,16 @@ you why. The unit binds gunicorn to `/run/sablos/sablos.sock`.
 
 ## 7. Wire up nginx for `sablos.devs.tt`
 
+Static files are served by **WhiteNoise** inside the gunicorn process,
+so nginx only needs to proxy and (optionally) serve `/media/` directly.
+There is no `location /static/` block.
+
 If you already have an nginx site for `sablos.devs.tt` (created when you
 ran `certbot --nginx` earlier for another project), **don't replace it**.
-Instead, copy the `location /static/`, `location /media/`, and
-`location /` blocks from `deploy/sablos.nginx.conf` into the existing
-`server { ... }` block(s) for `sablos.devs.tt`, then:
+Instead, copy the `location /media/` and `location /` blocks from
+`deploy/sablos.nginx.conf` into the existing `server { ... }` block(s)
+for `sablos.devs.tt`, and **remove any old `location /static/` block**
+that points at a stale path. Then:
 
 ```bash
 sudo nginx -t
@@ -122,12 +127,14 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-Make sure `/var/www/sablos_root` and `/var/www/sablos_media` are
-readable by `www-data` (the `sablos` user's home + the `/var/www` tree
-default to mode 755, which is fine; create the media dir with
-`sudo mkdir -p /var/www/sablos_media && sudo chown sablos:sablos /var/www/sablos_media`).
+Create the media directory if it doesn't exist:
 
-Visit `http://sablos.devs.tt` — the site should load.
+```bash
+sudo mkdir -p /var/www/sablos_root/media
+sudo chown sablos:sablos /var/www/sablos_root/media
+```
+
+Visit `http://sablos.devs.tt` — the site should load with styling intact.
 
 ## 8. TLS via Let's Encrypt
 
@@ -196,5 +203,5 @@ S3-compatible storage from cron.
 
 - **502 Bad Gateway**: gunicorn isn't running. `sudo systemctl status sablos` and `journalctl -u sablos`.
 - **CSRF / DisallowedHost errors**: check `DJANGO_ALLOWED_HOSTS` in `.env` matches the URL you're using.
-- **Static files missing**: re-run `./redeploy.sh` (which calls `collectstatic`), and make sure nginx's `alias` path matches `STATIC_ROOT`.
+- **Static files missing or unstyled CSS**: re-run `./redeploy.sh` (which calls `collectstatic`). Static files are served by WhiteNoise from `STATIC_ROOT` (`<repo>/staticfiles/`); if you still see a stale `location /static/` block in the nginx site pointing at a path that doesn't exist, delete it and `sudo systemctl reload nginx`.
 - **Permission denied on socket**: confirm the `RuntimeDirectory=sablos` line in the service file and that nginx's `www-data` user is in a position to reach `/run/sablos/sablos.sock` (default Ubuntu setup permits this).
