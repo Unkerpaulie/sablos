@@ -1,6 +1,8 @@
 """Tests for the project-management app."""
 from __future__ import annotations
 
+from datetime import date, timedelta
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
@@ -8,6 +10,7 @@ from django.urls import reverse
 
 from . import services
 from .models import Client, Comment, Objective, Project
+from .templatetags.pm_extras import due_row_class
 
 User = get_user_model()
 
@@ -243,3 +246,41 @@ class CreateFormPrefillTests(_Fixtures):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["form"].initial.get("project"), str(self.proj_v.pk))
+
+
+
+class DueRowClassTests(_Fixtures):
+    def _make_objective(self, **kwargs):
+        defaults = {
+            "project": self.proj_v,
+            "description": "x",
+            "status": Objective.Status.IN_PROGRESS,
+        }
+        defaults.update(kwargs)
+        return Objective(**defaults)
+
+    def test_no_due_date_returns_empty(self):
+        self.assertEqual(due_row_class(self._make_objective(due_date=None)), "")
+
+    def test_overdue_returns_danger(self):
+        obj = self._make_objective(due_date=date.today() - timedelta(days=1))
+        self.assertEqual(due_row_class(obj), "table-danger")
+
+    def test_due_today_returns_warning(self):
+        obj = self._make_objective(due_date=date.today())
+        self.assertEqual(due_row_class(obj), "table-warning")
+
+    def test_due_within_three_days_returns_warning(self):
+        obj = self._make_objective(due_date=date.today() + timedelta(days=3))
+        self.assertEqual(due_row_class(obj), "table-warning")
+
+    def test_due_beyond_three_days_returns_empty(self):
+        obj = self._make_objective(due_date=date.today() + timedelta(days=4))
+        self.assertEqual(due_row_class(obj), "")
+
+    def test_done_objective_never_highlighted(self):
+        obj = self._make_objective(
+            due_date=date.today() - timedelta(days=10),
+            status=Objective.Status.DONE,
+        )
+        self.assertEqual(due_row_class(obj), "")

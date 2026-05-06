@@ -58,7 +58,7 @@
                 </thead>
                 <tbody>
                   {% for objective in group.objectives %}
-                    <tr>
+                    <tr class="{{ objective|due_row_class }}">
                       <td>
                         <a href="{% url 'pm:objective_detail' objective.pk %}">
                           {{ objective.short_description }}
