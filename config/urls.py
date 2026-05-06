@@ -11,6 +11,7 @@ urlpatterns = [
         name="login",
     ),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("wip/guests/", include("guests.urls", namespace="guests")),
     path("wip/", include("pm.urls", namespace="pm")),
     path("", include("home.urls", namespace="home")),
 ]

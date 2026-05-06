@@ -1,31 +1,48 @@
-{% with url_name=request.resolver_match.url_name|default:'' %}
+{% with url_name=request.resolver_match.url_name|default:'' namespace=request.resolver_match.namespace|default:'' %}
 <div class="position-sticky pt-3">
   <ul class="nav flex-column">
     <li class="nav-item">
-      <a class="nav-link {% if url_name == 'dashboard' %}active{% endif %}"
+      <a class="nav-link text-uppercase {% if url_name == 'dashboard' %}active{% endif %}"
          href="{% url 'pm:dashboard' %}">Dashboard</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link {% if url_name|slice:':7' == 'client_' %}active{% endif %}"
+    <li class="nav-item d-flex align-items-center">
+      <a class="nav-link text-uppercase flex-grow-1 {% if url_name|slice:':7' == 'client_' %}active{% endif %}"
          href="{% url 'pm:client_list' %}">Clients</a>
+      {% if user.is_staff %}
+        <a href="{% url 'pm:client_create' %}"
+           class="nav-link px-2 py-1 fw-bold"
+           aria-label="New client" title="New client">+</a>
+      {% endif %}
     </li>
-    <li class="nav-item">
-      <a class="nav-link {% if url_name|slice:':8' == 'project_' or url_name|slice:':10' == 'objective_' %}active{% endif %}"
+    <li class="nav-item d-flex align-items-center">
+      <a class="nav-link text-uppercase flex-grow-1 {% if url_name|slice:':8' == 'project_' or url_name|slice:':10' == 'objective_' %}active{% endif %}"
          href="{% url 'pm:project_list' %}">Projects</a>
+      {% if user.is_staff %}
+        <a href="{% url 'pm:project_create' %}"
+           class="nav-link px-2 py-1 fw-bold"
+           aria-label="New project" title="New project">+</a>
+      {% endif %}
     </li>
     <li class="nav-item">
-      <a class="nav-link {% if url_name|slice:':8' == 'comment_' %}active{% endif %}"
+      <a class="nav-link text-uppercase {% if url_name|slice:':8' == 'comment_' %}active{% endif %}"
          href="{% url 'pm:comment_list' %}">Comments</a>
     </li>
     {% if user.is_staff %}
       <li class="nav-item">
-        <a class="nav-link d-flex justify-content-between align-items-center {% if url_name|slice:':8' == 'message_' %}active{% endif %}"
+        <a class="nav-link text-uppercase d-flex justify-content-between align-items-center {% if url_name|slice:':8' == 'message_' %}active{% endif %}"
            href="{% url 'pm:message_list' %}">
           <span>Messages</span>
           {% if unread_messages_count %}
             <span class="badge bg-primary rounded-pill">{{ unread_messages_count }}</span>
           {% endif %}
         </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase {% if namespace == 'guests' %}active{% endif %}"
+           href="{% url 'guests:list' %}">Guests</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-uppercase" href="/admin/">Admin</a>
       </li>
     {% endif %}
   </ul>

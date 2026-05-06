@@ -1,0 +1,14 @@
+{% extends "layouts/dashboard.html" %}
+
+{% block title %}Delete guest — WIP{% endblock %}
+
+{% block dashboard_content %}
+  <h1 class="h3 mb-3">Delete guest</h1>
+  <p>Are you sure you want to delete <strong>{{ guest.username }}</strong>?
+     This permanently removes the account.</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="{% url 'guests:list' %}" class="btn btn-link">Cancel</a>
+  </form>
+{% endblock %}
