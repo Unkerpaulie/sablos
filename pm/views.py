@@ -121,6 +121,13 @@ class ProjectCreateView(StaffLoginRequiredMixin, CreateView):
     form_class = ProjectForm
     template_name = "pm/projects/form.html"
 
+    def get_initial(self):
+        initial = super().get_initial()
+        client_id = self.request.GET.get("client")
+        if client_id:
+            initial["client"] = client_id
+        return initial
+
 
 class ProjectUpdateView(StaffLoginRequiredMixin, UpdateView):
     model = Project

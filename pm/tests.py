@@ -226,3 +226,20 @@ class AccessControlTests(_Fixtures):
         self.assertTrue(ContactMessage.objects.get(pk=msg.pk).is_read)
         self.client.post(url)
         self.assertFalse(ContactMessage.objects.get(pk=msg.pk).is_read)
+
+
+
+class CreateFormPrefillTests(_Fixtures):
+    def test_project_create_preselects_client_from_query(self):
+        self.client.force_login(self.staff)
+        url = reverse("pm:project_create") + f"?client={self.client_v.pk}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["form"].initial.get("client"), str(self.client_v.pk))
+
+    def test_objective_create_preselects_project_from_query(self):
+        self.client.force_login(self.staff)
+        url = reverse("pm:objective_create") + f"?project={self.proj_v.pk}"
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["form"].initial.get("project"), str(self.proj_v.pk))

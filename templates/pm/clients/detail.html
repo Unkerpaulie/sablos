@@ -38,7 +38,13 @@
     <div class="mb-3">{{ client.notes|markdown }}</div>
   {% endif %}
 
-  <h2 class="h5 mt-4 mb-3">Projects</h2>
+  <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h2 class="h5 mb-0">Projects</h2>
+    {% if user.is_staff %}
+      <a href="{% url 'pm:project_create' %}?client={{ client.pk }}"
+         class="btn btn-sm btn-primary">+ New project</a>
+    {% endif %}
+  </div>
   {% if client.projects.all %}
     <ul class="list-group">
       {% for project in client.projects.all %}
