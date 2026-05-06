@@ -59,6 +59,7 @@ def get_dashboard_groups(user) -> list[DashboardGroup]:
     return [
         DashboardGroup(project=project, objectives=list(project.active_objectives))
         for project in projects
+        if project.active_objectives
     ]
 
 

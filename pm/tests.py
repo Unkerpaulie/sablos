@@ -115,6 +115,21 @@ class ServicesTests(_Fixtures):
         statuses = {o.status for o in groups[self.proj_v.pk].objectives}
         self.assertEqual(statuses, {Objective.Status.IN_PROGRESS})
 
+    def test_dashboard_excludes_projects_with_no_open_objectives(self):
+        empty = Project.objects.create(client=self.client_v, name="EmptyProj")
+        Project.objects.create(client=self.client_v, name="DoneOnlyProj")
+        Objective.objects.create(
+            project=Project.objects.get(name="DoneOnlyProj"),
+            description="finished",
+            status=Objective.Status.DONE,
+        )
+        pks = {g.project.pk for g in services.get_dashboard_groups(self.staff)}
+        self.assertNotIn(empty.pk, pks)
+        self.assertNotIn(
+            Project.objects.get(name="DoneOnlyProj").pk, pks,
+        )
+        self.assertIn(self.proj_v.pk, pks)
+
     def test_list_projects_omits_clients_with_no_visible_projects(self):
         staff_grouped = list(services.list_projects_grouped_by_client(self.staff))
         guest_grouped = list(services.list_projects_grouped_by_client(self.guest))
