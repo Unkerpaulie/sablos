@@ -74,7 +74,7 @@
                           {{ objective.get_priority_display }}
                         </span>
                       </td>
-                      <td>{{ objective.due_date|default:"—" }}</td>
+                      <td>{{ objective.due_date|date:"D j M Y"|default:"—" }}</td>
                       <td class="text-end text-body-secondary">{{ objective.comment_count }}</td>
                     </tr>
                   {% endfor %}

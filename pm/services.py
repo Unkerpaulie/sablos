@@ -8,7 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable
 
-from django.db.models import Count, Prefetch, Q, QuerySet
+from django.db.models import Case, Count, IntegerField, Prefetch, Q, QuerySet, Value, When
 
 from .models import Comment, Objective, Project
 
@@ -34,14 +34,24 @@ def objectives_with_comment_count(user=None) -> QuerySet[Objective]:
 
 
 def get_dashboard_groups(user) -> list[DashboardGroup]:
-    """Return active projects with their open objectives.
+    """Return active projects with their non-done objectives.
 
-    Only objectives whose status is ``Open`` (``IN_PROGRESS``) are
-    surfaced on the dashboard; completed and hidden-from-user projects
-    are excluded.
+    Open (IN_PROGRESS) objectives appear first, followed by Future (TODO)
+    then Backlog (BLOCKED). Closed objectives and completed/hidden projects
+    are excluded entirely.
     """
-    open_objectives = objectives_with_comment_count(user).filter(
-        status=Objective.Status.IN_PROGRESS,
+    _status_order = Case(
+        When(status=Objective.Status.IN_PROGRESS, then=Value(0)),
+        When(status=Objective.Status.TODO, then=Value(1)),
+        When(status=Objective.Status.BLOCKED, then=Value(2)),
+        default=Value(3),
+        output_field=IntegerField(),
+    )
+    non_done_objectives = (
+        objectives_with_comment_count(user)
+        .exclude(status=Objective.Status.DONE)
+        .annotate(_status_order=_status_order)
+        .order_by("_status_order", "priority", "due_date")
     )
     projects = (
         Project.objects.visible_to(user)
@@ -50,7 +60,7 @@ def get_dashboard_groups(user) -> list[DashboardGroup]:
         .prefetch_related(
             Prefetch(
                 "objectives",
-                queryset=open_objectives,
+                queryset=non_done_objectives,
                 to_attr="active_objectives",
             )
         )

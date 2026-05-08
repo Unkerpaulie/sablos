@@ -45,7 +45,7 @@
         <span class="collapse-icon-expanded">−</span>
         <span class="collapse-icon-collapsed">+</span>
       </button>
-      <span class="fw-semibold">Init prompt</span>
+      <span class="fw-semibold">Description</span>
     </div>
     <div id="proj-init-prompt" class="collapse">
       <div class="card-body">{{ project.init_prompt|markdown|default:'<span class="text-body-secondary">—</span>' }}</div>
@@ -108,7 +108,7 @@
               <td><a href="{{ objective.get_absolute_url }}">{{ objective.short_description }}</a></td>
               <td><span class="badge {{ objective.status|status_badge }}">{{ objective.get_status_display }}</span></td>
               <td><span class="badge {{ objective.priority|priority_badge }}">{{ objective.get_priority_display }}</span></td>
-              <td>{{ objective.due_date|default:"—" }}</td>
+              <td>{{ objective.due_date|date:"D j M Y"|default:"—" }}</td>
               <td class="text-end text-body-secondary">{{ objective.comment_count }}</td>
             </tr>
           {% endfor %}

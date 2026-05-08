@@ -19,7 +19,7 @@
       <span class="badge {{ objective.status|status_badge }}">{{ objective.get_status_display }}</span>
       <span class="badge {{ objective.priority|priority_badge }}">{{ objective.get_priority_display }}</span>
       {% if objective.due_date %}
-        <span class="text-body-secondary small ms-2">due {{ objective.due_date }}</span>
+        <span class="text-body-secondary small ms-2">due {{ objective.due_date|date:"D j M Y" }}</span>
       {% endif %}
     </div>
     {% if user.is_staff %}
@@ -31,7 +31,7 @@
   </div>
 
   <div class="card mb-4">
-    <div class="card-body">{{ objective.description|linebreaksbr }}</div>
+    <div class="card-body">{{ objective.description|markdown }}</div>
   </div>
 
   <h2 class="h5 mb-3">Comments</h2>
@@ -46,7 +46,7 @@
   {% for comment in objective.comments.all %}
     <div class="border-start border-3 ps-3 mb-3">
       <div class="d-flex justify-content-between">
-        <span class="text-body-secondary small">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
+        <span class="text-body-secondary small">{{ comment.created_at|date:"D j M Y, H:i" }}</span>
         {% if user.is_staff %}
           <a href="{% url 'pm:comment_delete' comment.pk %}" class="text-danger small">delete</a>
         {% endif %}
