@@ -1,8 +1,12 @@
 """Tests for the public home app."""
 from __future__ import annotations
 
+import hashlib
+import hmac
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .models import ContactMessage
@@ -77,6 +81,55 @@ class GuestSignUpViewTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response["Location"].endswith(reverse("pm:dashboard")))
+
+
+_SECRET = "test-webhook-secret"
+_WEBHOOK_URL = "/deploy/github-webhook/"
+
+
+def _make_sig(body: bytes, secret: str = _SECRET) -> str:
+    return "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+
+
+@override_settings(GITHUB_WEBHOOK_SECRET=_SECRET)
+class GithubWebhookTests(TestCase):
+    def _post(self, body: bytes = b"{}", sig: str | None = None) -> object:
+        if sig is None:
+            sig = _make_sig(body)
+        return self.client.post(
+            _WEBHOOK_URL,
+            data=body,
+            content_type="application/json",
+            HTTP_X_HUB_SIGNATURE_256=sig,
+        )
+
+    def test_get_not_allowed(self):
+        response = self.client.get(_WEBHOOK_URL)
+        self.assertEqual(response.status_code, 405)
+
+    def test_missing_signature_returns_403(self):
+        response = self.client.post(_WEBHOOK_URL, data=b"{}", content_type="application/json")
+        self.assertEqual(response.status_code, 403)
+
+    def test_wrong_signature_returns_403(self):
+        response = self._post(sig=_make_sig(b"{}", secret="wrong-secret"))
+        self.assertEqual(response.status_code, 403)
+
+    @patch("home.views.subprocess.Popen")
+    def test_valid_request_triggers_popen_and_returns_202(self, mock_popen):
+        response = self._post()
+        self.assertEqual(response.status_code, 202)
+        mock_popen.assert_called_once()
+        args, kwargs = mock_popen.call_args
+        self.assertIn("redeploy.sh", args[0][1])
+        self.assertTrue(kwargs.get("start_new_session"))
+
+    @override_settings(GITHUB_WEBHOOK_SECRET="")
+    @patch("home.views.subprocess.Popen")
+    def test_unconfigured_secret_returns_403_and_does_not_spawn(self, mock_popen):
+        response = self._post()
+        self.assertEqual(response.status_code, 403)
+        mock_popen.assert_not_called()
 
 
 class ContactMessageModelTests(TestCase):

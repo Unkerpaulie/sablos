@@ -106,14 +106,39 @@ class ServicesTests(_Fixtures):
         self.assertNotIn(self.proj_h.pk, guest_pks)
         self.assertIn(self.proj_v.pk, guest_pks)
 
-    def test_dashboard_only_open_objectives(self):
+    def test_dashboard_excludes_done_objectives(self):
+        """DONE objectives never appear; TODO and BLOCKED do."""
+        todo_obj = Objective.objects.create(
+            project=self.proj_v, description="future task",
+            status=Objective.Status.TODO,
+        )
+        blocked_obj = Objective.objects.create(
+            project=self.proj_v, description="blocked task",
+            status=Objective.Status.BLOCKED,
+        )
+        done_obj = Objective.objects.create(
+            project=self.proj_v, description="done task",
+            status=Objective.Status.DONE,
+        )
+        groups = {g.project.pk: g for g in services.get_dashboard_groups(self.staff)}
+        objective_pks = {o.pk for o in groups[self.proj_v.pk].objectives}
+        self.assertIn(self.obj_v.pk, objective_pks)
+        self.assertIn(todo_obj.pk, objective_pks)
+        self.assertIn(blocked_obj.pk, objective_pks)
+        self.assertNotIn(done_obj.pk, objective_pks)
+
+    def test_dashboard_objectives_ordered_open_first(self):
+        """IN_PROGRESS objectives appear before TODO and BLOCKED."""
         Objective.objects.create(
-            project=self.proj_v, description="future",
+            project=self.proj_v, description="future task",
             status=Objective.Status.TODO,
         )
         groups = {g.project.pk: g for g in services.get_dashboard_groups(self.staff)}
-        statuses = {o.status for o in groups[self.proj_v.pk].objectives}
-        self.assertEqual(statuses, {Objective.Status.IN_PROGRESS})
+        statuses = [o.status for o in groups[self.proj_v.pk].objectives]
+        open_indices = [i for i, s in enumerate(statuses) if s == Objective.Status.IN_PROGRESS]
+        other_indices = [i for i, s in enumerate(statuses) if s != Objective.Status.IN_PROGRESS]
+        if open_indices and other_indices:
+            self.assertLess(max(open_indices), min(other_indices))
 
     def test_dashboard_excludes_projects_with_no_open_objectives(self):
         empty = Project.objects.create(client=self.client_v, name="EmptyProj")
@@ -125,9 +150,7 @@ class ServicesTests(_Fixtures):
         )
         pks = {g.project.pk for g in services.get_dashboard_groups(self.staff)}
         self.assertNotIn(empty.pk, pks)
-        self.assertNotIn(
-            Project.objects.get(name="DoneOnlyProj").pk, pks,
-        )
+        self.assertNotIn(Project.objects.get(name="DoneOnlyProj").pk, pks)
         self.assertIn(self.proj_v.pk, pks)
 
     def test_list_projects_omits_clients_with_no_visible_projects(self):

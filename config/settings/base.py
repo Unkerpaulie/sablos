@@ -98,6 +98,9 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "/static/"
+
+# GitHub webhook — set GITHUB_WEBHOOK_SECRET in .env to enable the deploy hook.
+GITHUB_WEBHOOK_SECRET = env("GITHUB_WEBHOOK_SECRET", "")
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
